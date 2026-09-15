@@ -4,7 +4,7 @@
 > Requisitos completos do produto: [`PRD.md`](../PRD.md).
 
 **Última atualização:** 15/09/2026
-**Fase atual:** Fase 0 (Fundação), banco, login e tela de Pessoas prontos; faltam Usuários, Configurações e backup
+**Fase atual:** Fase 0 (Fundação), banco, login, Pessoas e edição de Usuários prontos; faltam criar login pelo app, Configurações e backup
 
 ---
 
@@ -41,6 +41,11 @@ movimentações).
   telefone em `src/lib/formato.ts`; consultas em `src/lib/pessoas.ts`.
 - `supabase/sql/003_pessoa_documento_unico.sql`: índice único parcial que impede
   cadastrar duas pessoas com o mesmo CPF.
+- Tela de **Usuários** (só admin): lista, edição de nome e função, e
+  bloquear/liberar acesso. Sem SQL novo — o RLS do 001 já cobria.
+  Travas contra se trancar para fora: o admin não consegue tirar a própria
+  função de administrador nem bloquear o próprio acesso.
+- Perfis movidos para `src/lib/perfis.ts` (ver nota sobre servidor × navegador).
 
 ### 14/09/2026
 - PRD escrito e refinado até a v0.4, com decisões D1 a D9 na seção 12.
@@ -62,7 +67,8 @@ movimentações).
 - [x] Tela de login e proteção das páginas (redirecionar quem não está logado)
 - [x] Criar o primeiro usuário administrador
 - [x] Tela de Pessoas (cadastro de freelancers) — PRD §7.9
-- [ ] Tela de Usuários: admin cria, edita e desativa — RF03
+- [x] Tela de Usuários: admin **edita** nome e função, e bloqueia/libera acesso
+- [ ] Criar login novo pelo próprio app (parte que falta do RF03 — exige a Secret key)
 - [ ] Tela de Configurações (dias de folga da reserva)
 - [ ] Backup diário do banco (PRD §13.5)
 
@@ -77,6 +83,15 @@ movimentações).
 - **Zod v4:** é `z.email()` (função de topo), não mais `z.string().email()`.
 - **Botão que vira link:** o shadcn atual (estilo `base-nova`) roda sobre o Base UI, que **não tem `asChild`**. Use `render`: `<Button render={<Link href="/x" />}>Texto</Button>`.
 - **Comentário JSX com crase quebra o build:** o Turbopack não conseguiu ler um `{/* ... */}` que tinha crases dentro. Evite crases em comentários JSX.
+- **Servidor × navegador:** um arquivo `"use client"` não pode importar, nem
+  indiretamente, nada que use `next/headers` — o build quebra com
+  *"You're importing a component that needs next/headers"*. Por isso constantes
+  compartilhadas (como os perfis) moram em `src/lib/perfis.ts`, sem imports de
+  servidor, e `src/lib/auth.ts` só re-exporta o tipo.
+- **Join do Supabase sem tipos gerados:** em `select("... pessoa (nome)")` o
+  TypeScript assume que `pessoa` pode ser uma lista, embora em tempo de
+  execução venha um objeto. Ver o tratamento em `src/lib/usuarios.ts`. Some
+  quando gerarmos os tipos do banco.
 - **Telefone e CPF** são gravados **só com números** (`src/lib/formato.ts`), e formatados na hora de exibir. Assim a busca e o índice de CPF único funcionam.
 - **Grupo de rotas `(app)`:** pasta entre parênteses organiza os arquivos sem aparecer no endereço. Tudo dentro de `src/app/(app)/` herda o layout protegido.
 - **Variáveis de ambiente:** modelo em `.env.example`. O `.env.local` é ignorado pelo Git. Na Vercel, as mesmas variáveis estão em *Settings → Environment Variables*.

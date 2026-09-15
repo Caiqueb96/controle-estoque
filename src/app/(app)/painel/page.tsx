@@ -6,7 +6,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { exigirUsuario, NOME_DO_PERFIL } from "@/lib/auth"
+import { exigirUsuario } from "@/lib/auth"
+import { NOME_DO_PERFIL } from "@/lib/perfis"
 
 export const metadata: Metadata = {
   title: "Painel | Controle de Estoque",

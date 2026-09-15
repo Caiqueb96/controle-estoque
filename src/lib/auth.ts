@@ -2,8 +2,11 @@ import { cache } from "react"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 
-// Perfis de acesso do sistema (PRD secao 5.5).
-export type Perfil = "admin" | "almoxarife" | "produtor" | "campo"
+// Perfis de acesso do sistema (PRD secao 5.5). Ficam em src/lib/perfis.ts
+// porque as telas do navegador tambem precisam deles.
+import type { Perfil } from "@/lib/perfis"
+
+export type { Perfil }
 
 export type UsuarioLogado = {
   id: string
@@ -79,10 +82,3 @@ export async function exigirPerfil(perfis: Perfil[]): Promise<UsuarioLogado> {
   return usuario
 }
 
-// Nome legivel do perfil, para mostrar na tela.
-export const NOME_DO_PERFIL: Record<Perfil, string> = {
-  admin: "Administrador",
-  almoxarife: "Almoxarife",
-  produtor: "Produtor de eventos",
-  campo: "Equipe de campo",
-}

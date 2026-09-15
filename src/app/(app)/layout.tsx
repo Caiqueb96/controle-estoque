@@ -1,13 +1,16 @@
 import type { ReactNode } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { exigirUsuario, NOME_DO_PERFIL } from "@/lib/auth"
+import { exigirUsuario } from "@/lib/auth"
+import { NOME_DO_PERFIL, type Perfil } from "@/lib/perfis"
 import { sair } from "./actions"
 
 // Menu do topo. Vai crescendo conforme as telas ficam prontas.
-const MENU = [
+// `perfis` ausente = todo mundo ve o item.
+const MENU: { href: string; rotulo: string; perfis?: Perfil[] }[] = [
   { href: "/painel", rotulo: "Painel" },
   { href: "/pessoas", rotulo: "Pessoas" },
+  { href: "/usuarios", rotulo: "Usuários", perfis: ["admin"] },
 ]
 
 /**
@@ -29,7 +32,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
               Controle de Estoque
             </Link>
             <nav className="flex items-center gap-4 text-sm">
-              {MENU.map((item) => (
+              {MENU.filter(
+                (item) => !item.perfis || item.perfis.includes(usuario.perfil)
+              ).map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}

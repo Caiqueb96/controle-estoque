@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -49,7 +50,11 @@ export default async function EditarPessoaPage({
       {pessoa.tipo === "usuario" && (
         <p className="rounded-md border border-dashed px-4 py-3 text-sm text-muted-foreground">
           Esta pessoa tem login no sistema. Desativá-la aqui não bloqueia o
-          acesso: isso é feito na tela de Usuários.
+          acesso: isso é feito na tela de{" "}
+          <Link href="/usuarios" className="underline">
+            Usuários
+          </Link>
+          .
         </p>
       )}
 
