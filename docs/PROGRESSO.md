@@ -10,19 +10,46 @@
 
 ## Onde paramos
 
-O banco tem as três primeiras tabelas com segurança por linha (RLS) ligada, e o
-sistema **já tem login funcionando**: quem não está logado é mandado para
-`/login`, e quem entra cai no `/painel` com nome e perfil na tela. O primeiro
-administrador foi criado.
+O sistema **já funciona de ponta a ponta para pessoas e usuários**, testado pelo
+usuário:
 
-**Próximo passo combinado:** fechar a Fase 0 com as telas de **Pessoas**
-(freelancers) e **Usuários** (admin cria, edita e desativa — RF03), mais a tela
-de **Configurações**. Depois disso começa a Fase 1 (itens, categorias, locais e
+- Login, logout e proteção de todas as páginas.
+- **Pessoas**: lista com busca e filtro, cadastro de freelancer, edição,
+  ativar/desativar. CPF validado e único.
+- **Usuários** (só admin): lista, correção de nome, troca de função e
+  bloquear/liberar acesso.
+
+Três SQLs já rodados no painel do Supabase: `001_fundacao`,
+`002_primeiro_admin` e `003_pessoa_documento_unico`.
+
+### Próximo passo combinado (retomar aqui)
+
+Fechar a Fase 0, nesta ordem:
+
+**1. Criar login novo pelo próprio app** (parte que falta do RF03). É a tarefa
+delicada do dia. Roteiro:
+
+- No painel do Supabase: *Project Settings → API Keys* → copiar a **Secret key**
+  (`sb_secret_...`).
+- Guardar em `.env.local` como `SUPABASE_SECRET_KEY` — **sem** o prefixo
+  `NEXT_PUBLIC_`, senão ela vaza para o navegador. Acrescentar a linha ao
+  `.env.example` (só o nome, sem o valor).
+- Repetir a variável na Vercel: *Settings → Environment Variables*.
+- Criar um cliente admin novo (ex.: `src/lib/supabase/admin.ts`) que use essa
+  chave. Ele **ignora o RLS**, então só pode ser chamado depois de
+  `exigirPerfil(["admin"])`.
+- Fluxo da tela: `auth.admin.createUser({ email, password, email_confirm: true })`
+  → criar a `pessoa` → criar a linha em `usuario` com o `id` devolvido. Se um
+  dos passos falhar, desfazer os anteriores (senão sobra login órfão).
+
+**2. Tela de Configurações** — editar `dias_folga_reserva` (tabela
+`configuracao`). Tarefa curta, mesmo padrão das outras telas.
+
+**3. Backup diário do banco** (PRD §13.5) — configuração no painel do Supabase,
+sem código.
+
+Depois disso começa a **Fase 1: Estoque** (itens, categorias, locais e
 movimentações).
-
-> Atenção para o RF03: criar um login novo pelo app exige a *Secret key* do
-> Supabase (`supabase.auth.admin.createUser`). Ela **só pode** ficar numa
-> variável de ambiente do servidor (sem `NEXT_PUBLIC_`), nunca no código.
 
 ## Histórico
 
@@ -46,6 +73,8 @@ movimentações).
   Travas contra se trancar para fora: o admin não consegue tirar a própria
   função de administrador nem bloquear o próprio acesso.
 - Perfis movidos para `src/lib/perfis.ts` (ver nota sobre servidor × navegador).
+- Tudo testado pelo usuário: login, cadastro/edição/desativação de pessoa,
+  busca, CPF inválido recusado, e edição de usuário.
 
 ### 14/09/2026
 - PRD escrito e refinado até a v0.4, com decisões D1 a D9 na seção 12.
