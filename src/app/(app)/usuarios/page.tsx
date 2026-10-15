@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Table,
   TableBody,
@@ -24,11 +25,14 @@ export default async function UsuariosPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Usuários</h1>
-        <p className="text-muted-foreground">
-          Quem tem login no sistema e o que cada um pode fazer.
-        </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold">Usuários</h1>
+          <p className="text-muted-foreground">
+            Quem tem login no sistema e o que cada um pode fazer.
+          </p>
+        </div>
+        <Button nativeButton={false} render={<Link href="/usuarios/novo" />}>Novo usuário</Button>
       </div>
 
       <div className="rounded-md border">
@@ -72,13 +76,6 @@ export default async function UsuariosPage() {
           </TableBody>
         </Table>
       </div>
-
-      <p className="rounded-md border border-dashed px-4 py-3 text-sm text-muted-foreground">
-        Para criar um login novo, por enquanto use o painel do Supabase
-        (Authentication → Users) e depois o arquivo{" "}
-        <code className="font-mono">supabase/sql/002_primeiro_admin.sql</code>.
-        A criação direto por aqui entra no próximo passo.
-      </p>
     </div>
   )
 }

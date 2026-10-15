@@ -3,8 +3,8 @@
 > Diário de bordo para retomar o trabalho entre sessões. Atualize ao fim de cada dia.
 > Requisitos completos do produto: [`PRD.md`](../PRD.md).
 
-**Última atualização:** 15/09/2026
-**Fase atual:** Fase 0 (Fundação), banco, login, Pessoas e edição de Usuários prontos; faltam criar login pelo app, Configurações e backup
+**Última atualização:** 15/10/2026
+**Fase atual:** Fase 0 (Fundação), banco, login, Pessoas e Usuários (inclusive criar login) prontos; faltam Configurações e backup
 
 ---
 
@@ -16,8 +16,8 @@ usuário:
 - Login, logout e proteção de todas as páginas.
 - **Pessoas**: lista com busca e filtro, cadastro de freelancer, edição,
   ativar/desativar. CPF validado e único.
-- **Usuários** (só admin): lista, correção de nome, troca de função e
-  bloquear/liberar acesso.
+- **Usuários** (só admin): lista, criação de login novo, correção de nome,
+  troca de função e bloquear/liberar acesso.
 
 Três SQLs já rodados no painel do Supabase: `001_fundacao`,
 `002_primeiro_admin` e `003_pessoa_documento_unico`.
@@ -26,32 +26,36 @@ Três SQLs já rodados no painel do Supabase: `001_fundacao`,
 
 Fechar a Fase 0, nesta ordem:
 
-**1. Criar login novo pelo próprio app** (parte que falta do RF03). É a tarefa
-delicada do dia. Roteiro:
+**0. Pendências da Secret key (fazer antes do push):**
+- A chave atual passou pelo chat: criar uma **nova** Secret key no painel,
+  colocar no `.env.local`, testar, e só então **apagar a antiga**.
+- Pôr a chave nova na Vercel (*Settings → Environment Variables*,
+  `SUPABASE_SECRET_KEY`). Sem ela, criar usuário em produção dá erro.
+- Depois disso, `git push` do commit da criação de usuários.
 
-- No painel do Supabase: *Project Settings → API Keys* → copiar a **Secret key**
-  (`sb_secret_...`).
-- Guardar em `.env.local` como `SUPABASE_SECRET_KEY` — **sem** o prefixo
-  `NEXT_PUBLIC_`, senão ela vaza para o navegador. Acrescentar a linha ao
-  `.env.example` (só o nome, sem o valor).
-- Repetir a variável na Vercel: *Settings → Environment Variables*.
-- Criar um cliente admin novo (ex.: `src/lib/supabase/admin.ts`) que use essa
-  chave. Ele **ignora o RLS**, então só pode ser chamado depois de
-  `exigirPerfil(["admin"])`.
-- Fluxo da tela: `auth.admin.createUser({ email, password, email_confirm: true })`
-  → criar a `pessoa` → criar a linha em `usuario` com o `id` devolvido. Se um
-  dos passos falhar, desfazer os anteriores (senão sobra login órfão).
-
-**2. Tela de Configurações** — editar `dias_folga_reserva` (tabela
+**1. Tela de Configurações** — editar `dias_folga_reserva` (tabela
 `configuracao`). Tarefa curta, mesmo padrão das outras telas.
 
-**3. Backup diário do banco** (PRD §13.5) — configuração no painel do Supabase,
+**2. Backup diário do banco** (PRD §13.5) — configuração no painel do Supabase,
 sem código.
+
+**Ideia anotada:** tela "Trocar minha senha" (hoje só dá pelo SQL, ver notas).
 
 Depois disso começa a **Fase 1: Estoque** (itens, categorias, locais e
 movimentações).
 
 ## Histórico
+
+### 15/10/2026
+- **Criar login pelo próprio app** (fecha o RF03): botão *Novo usuário* em
+  `/usuarios` → `/usuarios/novo`. A Server Action `criarUsuario` cria o login
+  no Supabase Auth, depois a `pessoa` e o `usuario`; se um passo falha, desfaz
+  os anteriores para não sobrar login órfão. Testado pelo usuário.
+- Cliente admin em `src/lib/supabase/admin.ts` (Secret key, protegido por
+  `import "server-only"`). Usado só para o Auth; as tabelas continuam pelo
+  cliente normal, então o RLS confere de novo.
+- Corrigido aviso do Base UI nos botões que viram link (`nativeButton={false}`).
+- Senha do admin redefinida pelo SQL Editor (ver notas técnicas).
 
 ### 15/09/2026
 - Criadas as tabelas `pessoa`, `usuario` e `configuracao` com RLS conforme a
@@ -97,7 +101,7 @@ movimentações).
 - [x] Criar o primeiro usuário administrador
 - [x] Tela de Pessoas (cadastro de freelancers) — PRD §7.9
 - [x] Tela de Usuários: admin **edita** nome e função, e bloqueia/libera acesso
-- [ ] Criar login novo pelo próprio app (parte que falta do RF03 — exige a Secret key)
+- [x] Criar login novo pelo próprio app (RF03) — falta só pôr a Secret key na Vercel
 - [ ] Tela de Configurações (dias de folga da reserva)
 - [ ] Backup diário do banco (PRD §13.5)
 
@@ -110,7 +114,11 @@ movimentações).
 - **Chave do Supabase:** o projeto usa a *Publishable key* (`sb_publishable_...`) na variável `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. A *Secret key* (`sb_secret_...`) nunca deve ir para o código, para o GitHub ou para variáveis `NEXT_PUBLIC_`.
 - **Tipos do banco:** hoje as consultas ao Supabase voltam sem tipagem e são convertidas à mão (ex.: `data as LinhaUsuario | null`). Quando houver mais tabelas, vale gerar os tipos com `supabase gen types typescript` e passá-los para `createClient`.
 - **Zod v4:** é `z.email()` (função de topo), não mais `z.string().email()`.
-- **Botão que vira link:** o shadcn atual (estilo `base-nova`) roda sobre o Base UI, que **não tem `asChild`**. Use `render`: `<Button render={<Link href="/x" />}>Texto</Button>`.
+- **Botão que vira link:** o shadcn atual (estilo `base-nova`) roda sobre o Base UI, que **não tem `asChild`**. Use `render` **e** `nativeButton={false}`: `<Button nativeButton={false} render={<Link href="/x" />}>Texto</Button>`. Sem o `nativeButton`, aparece um aviso de acessibilidade.
+- **Secret key mascarada:** o painel do Supabase mostra a chave como `sb_secret_...xyz`. Copiar esse texto dá *Invalid API key*. É preciso **revelar** (ícone de olho) antes de copiar; a chave real não tem pontos. Diagnóstico rápido: a publishable responde 200 e a secret 401 → a secret está errada.
+- **Esqueci a senha:** no SQL Editor, `update auth.users set encrypted_password = extensions.crypt('NOVA', extensions.gen_salt('bf')) where email = '...';`. O e-mail aparece em *Authentication → Users*.
+- **Cliente admin (`src/lib/supabase/admin.ts`):** ignora o RLS. Só chamar depois de `exigirPerfil(["admin"])` e só para o que exige (criar/apagar login).
+- **`.env.local` muda sem reiniciar:** o Next 16 recarrega sozinho ("Reload env" no terminal).
 - **Comentário JSX com crase quebra o build:** o Turbopack não conseguiu ler um `{/* ... */}` que tinha crases dentro. Evite crases em comentários JSX.
 - **Servidor × navegador:** um arquivo `"use client"` não pode importar, nem
   indiretamente, nada que use `next/headers` — o build quebra com

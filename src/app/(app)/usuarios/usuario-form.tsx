@@ -82,7 +82,7 @@ export function UsuarioForm({ usuario }: { usuario: Usuario }) {
         <Button type="submit" disabled={enviando}>
           {enviando ? "Salvando..." : "Salvar"}
         </Button>
-        <Button variant="outline" render={<Link href="/usuarios" />}>
+        <Button variant="outline" nativeButton={false} render={<Link href="/usuarios" />}>
           Cancelar
         </Button>
       </div>

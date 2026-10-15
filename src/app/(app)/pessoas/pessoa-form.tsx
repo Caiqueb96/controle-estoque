@@ -104,7 +104,7 @@ export function PessoaForm({ pessoa }: { pessoa?: Pessoa }) {
         <Button type="submit" disabled={enviando}>
           {enviando ? "Salvando..." : "Salvar"}
         </Button>
-        <Button variant="outline" render={<Link href="/pessoas" />}>
+        <Button variant="outline" nativeButton={false} render={<Link href="/pessoas" />}>
           Cancelar
         </Button>
       </div>

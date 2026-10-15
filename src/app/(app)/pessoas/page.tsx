@@ -53,7 +53,7 @@ export default async function PessoasPage({
           </p>
         </div>
         {podeEditar && (
-          <Button render={<Link href="/pessoas/nova" />}>Nova pessoa</Button>
+          <Button nativeButton={false} render={<Link href="/pessoas/nova" />}>Nova pessoa</Button>
         )}
       </div>
 
