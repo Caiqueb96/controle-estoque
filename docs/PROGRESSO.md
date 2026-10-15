@@ -27,11 +27,16 @@ Três SQLs já rodados no painel do Supabase: `001_fundacao`,
 Fechar a Fase 0, nesta ordem:
 
 **0. Pendências da Secret key (fazer antes do push):**
-- A chave atual passou pelo chat: criar uma **nova** Secret key no painel,
-  colocar no `.env.local`, testar, e só então **apagar a antiga**.
-- Pôr a chave nova na Vercel (*Settings → Environment Variables*,
-  `SUPABASE_SECRET_KEY`). Sem ela, criar usuário em produção dá erro.
-- Depois disso, `git push` do commit da criação de usuários.
+- [x] Chave **nova** criada, colocada no `.env.local` e testada (15/10).
+- [ ] **Apagar a chave antiga** no painel (*API Keys → Secret keys*, a que
+  termina em `...J_J`). Ela passou pelo chat e em 15/10 **ainda funcionava**.
+  Depois, testar de novo: antiga deve dar 401, nova 200.
+- [ ] Pôr a chave nova na Vercel (*Settings → Environment Variables*,
+  `SUPABASE_SECRET_KEY`, ambiente Production). Sem ela, criar usuário em
+  produção dá erro.
+- [ ] `git push` dos commits locais (criação de usuários + este diário).
+- Opcional antes do push: testar e-mail repetido, senha curta e entrar como
+  o usuário "joao" (Produtor), que não deve ver a tela de Usuários.
 
 **1. Tela de Configurações** — editar `dias_folga_reserva` (tabela
 `configuracao`). Tarefa curta, mesmo padrão das outras telas.
@@ -119,6 +124,7 @@ movimentações).
 - **Esqueci a senha:** no SQL Editor, `update auth.users set encrypted_password = extensions.crypt('NOVA', extensions.gen_salt('bf')) where email = '...';`. O e-mail aparece em *Authentication → Users*.
 - **Cliente admin (`src/lib/supabase/admin.ts`):** ignora o RLS. Só chamar depois de `exigirPerfil(["admin"])` e só para o que exige (criar/apagar login).
 - **`.env.local` muda sem reiniciar:** o Next 16 recarrega sozinho ("Reload env" no terminal).
+- **Servidor preso na porta 3000 (Windows):** parar o `npm run dev` às vezes deixa o processo do Next vivo. O próprio Next avisa o PID; encerre com `taskkill /PID <número> /F`.
 - **Comentário JSX com crase quebra o build:** o Turbopack não conseguiu ler um `{/* ... */}` que tinha crases dentro. Evite crases em comentários JSX.
 - **Servidor × navegador:** um arquivo `"use client"` não pode importar, nem
   indiretamente, nada que use `next/headers` — o build quebra com
