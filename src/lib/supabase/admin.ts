@@ -14,7 +14,9 @@ import { createClient } from "@supabase/supabase-js"
  * com esse prefixo são copiadas para o código que vai ao navegador.
  */
 export function createAdminClient() {
-  const chave = process.env.SUPABASE_SECRET_KEY
+  // Chaves nunca têm espaço nem quebra de linha. Se vierem com algum (erro
+  // comum ao colar no painel da Vercel), o Supabase recusa o pedido.
+  const chave = process.env.SUPABASE_SECRET_KEY?.replace(/\s/g, "")
 
   if (!chave) {
     throw new Error(

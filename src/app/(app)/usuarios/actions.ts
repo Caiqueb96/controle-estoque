@@ -85,7 +85,10 @@ export async function criarUsuario(
     if (erroLogin?.code === "weak_password") {
       return { erros: { senha: "Senha fraca demais. Misture letras e números." } }
     }
-    return { erro: `Não foi possível criar o login: ${erroLogin?.message ?? "erro desconhecido"}` }
+    // A mensagem técnica pode conter a Secret key (já aconteceu), então ela
+    // vai só para o log do servidor, nunca para a tela.
+    console.error("Erro ao criar login:", erroLogin)
+    return { erro: "Não foi possível criar o login. Tente de novo ou avise o suporte." }
   }
 
   const authId = criado.user.id

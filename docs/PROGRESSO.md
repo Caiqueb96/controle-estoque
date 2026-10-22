@@ -28,8 +28,10 @@ Três SQLs já rodados no painel do Supabase: `001_fundacao`,
 **1. Conferir em produção** que criar usuário funciona (prova de que a
 `SUPABASE_SECRET_KEY` da Vercel está certa).
 
-**2. Backup diário do banco** (PRD §13.5) — configuração no painel do Supabase,
-sem código. Fecha a Fase 0.
+**2. Backup diário do banco** (PRD §13.5). O plano Free do Supabase **não tem
+backup automático**; a ideia é um GitHub Action agendado. Atenção: o
+repositório é público e o banco tem CPFs, então o arquivo de backup não pode
+ficar exposto. Decidido em 22/10: repositório privado. Fecha a Fase 0.
 
 **Ideia anotada:** tela "Trocar minha senha" (hoje só dá pelo SQL, ver notas).
 
@@ -45,6 +47,12 @@ movimentações).
   Testada pelo usuário.
 - Secret key antiga apagada no painel; a nova está no `.env.local` e na Vercel.
 - Push dos commits pendentes (criação de usuários + Configurações).
+- Em produção, criar usuário falhou: a chave colada na Vercel tinha um espaço
+  no meio, e a mensagem de erro **exibiu a chave na tela**. Chave trocada de
+  novo (antiga dá 401). Correções: `admin.ts` remove espaços da chave e
+  `criarUsuario` não mostra mais o erro técnico (vai só para o log).
+- Repositório do GitHub tornado **privado** (o banco tem CPFs e o backup vai
+  ser gerado por GitHub Actions).
 
 ### 15/10/2026
 - **Criar login pelo próprio app** (fecha o RF03): botão *Novo usuário* em
@@ -117,6 +125,7 @@ movimentações).
 - **Botão que vira link:** o shadcn atual (estilo `base-nova`) roda sobre o Base UI, que **não tem `asChild`**. Use `render` **e** `nativeButton={false}`: `<Button nativeButton={false} render={<Link href="/x" />}>Texto</Button>`. Sem o `nativeButton`, aparece um aviso de acessibilidade.
 - **Secret key mascarada:** o painel do Supabase mostra a chave como `sb_secret_...xyz`. Copiar esse texto dá *Invalid API key*. É preciso **revelar** (ícone de olho) antes de copiar; a chave real não tem pontos. Diagnóstico rápido: a publishable responde 200 e a secret 401 → a secret está errada.
 - **Esqueci a senha:** no SQL Editor, `update auth.users set encrypted_password = extensions.crypt('NOVA', extensions.gen_salt('bf')) where email = '...';`. O e-mail aparece em *Authentication → Users*.
+- **Erro técnico não vai para a tela** em código que usa a Secret key: a mensagem pode conter a chave (aconteceu em 22/10). Use `console.error` e mostre texto genérico.
 - **Cliente admin (`src/lib/supabase/admin.ts`):** ignora o RLS. Só chamar depois de `exigirPerfil(["admin"])` e só para o que exige (criar/apagar login).
 - **`.env.local` muda sem reiniciar:** o Next 16 recarrega sozinho ("Reload env" no terminal).
 - **Servidor preso na porta 3000 (Windows):** parar o `npm run dev` às vezes deixa o processo do Next vivo. O próprio Next avisa o PID; encerre com `taskkill /PID <número> /F`.
