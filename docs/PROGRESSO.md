@@ -3,8 +3,8 @@
 > Diário de bordo para retomar o trabalho entre sessões. Atualize ao fim de cada dia.
 > Requisitos completos do produto: [`PRD.md`](../PRD.md).
 
-**Última atualização:** 15/10/2026
-**Fase atual:** Fase 0 (Fundação), banco, login, Pessoas e Usuários (inclusive criar login) prontos; faltam Configurações e backup
+**Última atualização:** 22/10/2026
+**Fase atual:** Fase 0 (Fundação), só falta o backup diário
 
 ---
 
@@ -18,31 +18,18 @@ usuário:
   ativar/desativar. CPF validado e único.
 - **Usuários** (só admin): lista, criação de login novo, correção de nome,
   troca de função e bloquear/liberar acesso.
+- **Configurações** (só admin): dias de folga entre eventos.
 
 Três SQLs já rodados no painel do Supabase: `001_fundacao`,
 `002_primeiro_admin` e `003_pessoa_documento_unico`.
 
 ### Próximo passo combinado (retomar aqui)
 
-Fechar a Fase 0, nesta ordem:
-
-**0. Pendências da Secret key (fazer antes do push):**
-- [x] Chave **nova** criada, colocada no `.env.local` e testada (15/10).
-- [ ] **Apagar a chave antiga** no painel (*API Keys → Secret keys*, a que
-  termina em `...J_J`). Ela passou pelo chat e em 15/10 **ainda funcionava**.
-  Depois, testar de novo: antiga deve dar 401, nova 200.
-- [ ] Pôr a chave nova na Vercel (*Settings → Environment Variables*,
-  `SUPABASE_SECRET_KEY`, ambiente Production). Sem ela, criar usuário em
-  produção dá erro.
-- [ ] `git push` dos commits locais (criação de usuários + este diário).
-- Opcional antes do push: testar e-mail repetido, senha curta e entrar como
-  o usuário "joao" (Produtor), que não deve ver a tela de Usuários.
-
-**1. Tela de Configurações** — editar `dias_folga_reserva` (tabela
-`configuracao`). Tarefa curta, mesmo padrão das outras telas.
+**1. Conferir em produção** que criar usuário funciona (prova de que a
+`SUPABASE_SECRET_KEY` da Vercel está certa).
 
 **2. Backup diário do banco** (PRD §13.5) — configuração no painel do Supabase,
-sem código.
+sem código. Fecha a Fase 0.
 
 **Ideia anotada:** tela "Trocar minha senha" (hoje só dá pelo SQL, ver notas).
 
@@ -50,6 +37,14 @@ Depois disso começa a **Fase 1: Estoque** (itens, categorias, locais e
 movimentações).
 
 ## Histórico
+
+### 22/10/2026
+- Tela de **Configurações** (`/configuracoes`, só admin): edita
+  `dias_folga_reserva` (0 a 30). Leitura em `src/lib/configuracao.ts`, que
+  converte o texto do banco em número. Sem SQL novo (RLS do 001 já cobria).
+  Testada pelo usuário.
+- Secret key antiga apagada no painel; a nova está no `.env.local` e na Vercel.
+- Push dos commits pendentes (criação de usuários + Configurações).
 
 ### 15/10/2026
 - **Criar login pelo próprio app** (fecha o RF03): botão *Novo usuário* em
@@ -106,8 +101,8 @@ movimentações).
 - [x] Criar o primeiro usuário administrador
 - [x] Tela de Pessoas (cadastro de freelancers) — PRD §7.9
 - [x] Tela de Usuários: admin **edita** nome e função, e bloqueia/libera acesso
-- [x] Criar login novo pelo próprio app (RF03) — falta só pôr a Secret key na Vercel
-- [ ] Tela de Configurações (dias de folga da reserva)
+- [x] Criar login novo pelo próprio app (RF03)
+- [x] Tela de Configurações (dias de folga da reserva)
 - [ ] Backup diário do banco (PRD §13.5)
 
 ## Notas técnicas importantes

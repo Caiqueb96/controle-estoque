@@ -11,6 +11,7 @@ const MENU: { href: string; rotulo: string; perfis?: Perfil[] }[] = [
   { href: "/painel", rotulo: "Painel" },
   { href: "/pessoas", rotulo: "Pessoas" },
   { href: "/usuarios", rotulo: "Usuários", perfis: ["admin"] },
+  { href: "/configuracoes", rotulo: "Configurações", perfis: ["admin"] },
 ]
 
 /**
