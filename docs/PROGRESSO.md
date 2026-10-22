@@ -4,7 +4,7 @@
 > Requisitos completos do produto: [`PRD.md`](../PRD.md).
 
 **Última atualização:** 22/10/2026
-**Fase atual:** Fase 0 (Fundação) **concluída**; próxima é a Fase 1 (Estoque)
+**Fase atual:** Fase 1 (Estoque), bloco 1 de 3 pronto (categorias e locais)
 
 ---
 
@@ -19,16 +19,23 @@ usuário:
 - **Usuários** (só admin): lista, criação de login novo, correção de nome,
   troca de função e bloquear/liberar acesso.
 - **Configurações** (só admin): dias de folga entre eventos.
+- **Categorias e locais** (`/cadastros`; admin e almoxarife editam): adicionar,
+  editar, desativar/reativar.
 
-Três SQLs já rodados no painel do Supabase: `001_fundacao`,
-`002_primeiro_admin` e `003_pessoa_documento_unico`.
+Quatro SQLs já rodados no painel do Supabase: `001_fundacao`,
+`002_primeiro_admin`, `003_pessoa_documento_unico` e
+`004_categorias_e_locais`.
 
 ### Próximo passo combinado (retomar aqui)
 
-**Fase 1: Estoque** (PRD §15, Roadmap): itens, categorias, locais, movimentações
-(entrada, ajuste, baixa) e histórico. Começar relendo no PRD os requisitos de
-estoque e o modelo de dados (§10) para planejar as tabelas, em blocos pequenos
-(sugestão: categorias e locais primeiro, depois itens, depois movimentações).
+**Fase 1: Estoque** (PRD §15, Roadmap), em 3 blocos:
+
+1. ~~Categorias e locais~~ (pronto em 22/10).
+2. **Itens** (RF10, RF14, RF15): tabela `item` e telas de lista com busca e
+   filtros, cadastro e edição. ← **retomar aqui**
+3. **Movimentações** (RF20, RF21, RF23, RF24): entrada, ajuste, baixa e
+   histórico imutável. Decidir como a quantidade do item é calculada a partir
+   das movimentações (PRD §10: "derivada ou conferida").
 
 > ⚠️ **Antes de entrar dado real** (empresa usando de verdade), tornar o
 > repositório **privado** (*GitHub → Settings → Danger Zone*) ou criptografar
@@ -38,6 +45,14 @@ estoque e o modelo de dados (§10) para planejar as tabelas, em blocos pequenos
 **Ideia anotada:** tela "Trocar minha senha" (hoje só dá pelo SQL, ver notas).
 
 ## Histórico
+
+### 22/10/2026 (Fase 1)
+- **Categorias e locais**: `supabase/sql/004_categorias_e_locais.sql` cria
+  `deposito` (com o "Depósito principal" e a função `deposito_padrao()`),
+  `categoria` (com as 5 do RF11) e `local`. Nome único sem diferenciar
+  maiúsculas. Sem regra de apagar: só desativar. Tela `/cadastros` com as duas
+  seções (`secao-cadastro.tsx`), que compartilham ações e leitura
+  (`src/lib/cadastros.ts`). Testado pelo usuário.
 
 ### 22/10/2026
 - Tela de **Configurações** (`/configuracoes`, só admin): edita
@@ -154,6 +169,7 @@ estoque e o modelo de dados (§10) para planejar as tabelas, em blocos pequenos
 - **Backup e GitHub Actions:** o banco só aceita conexão de fora pelo **Session pooler** (a "Direct connection" do plano Free não funciona a partir do GitHub). Erro `password authentication failed` = senha errada no endereço (colchetes esquecidos ou símbolos). Em repositório público sem commits por 60 dias, o GitHub **desliga** robôs agendados; basta reativar na aba Actions.
 - **Formulário que não muda de página:** depois de enviar, o React 19 limpa os campos sozinho, inclusive quando dá erro. Para não perder o que foi digitado, a Server Action devolve os `valores` e os campos usam `defaultValue={estado.valores?.campo}` (ver `cadastros/secao-cadastro.tsx`).
 - **SQL Editor:** colar o **conteúdo** do arquivo, não o caminho dele.
+- **Sem Python no computador:** para editar arquivos em lote, usar Node.js (`node -e`) ou as ferramentas de edição, não `python`.
 - **Deploy:** todo `git push` na `main` publica em produção em cerca de 30 segundos.
 
 ## Como rodar localmente
