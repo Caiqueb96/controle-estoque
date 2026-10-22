@@ -4,7 +4,7 @@
 > Requisitos completos do produto: [`PRD.md`](../PRD.md).
 
 **Última atualização:** 22/10/2026
-**Fase atual:** Fase 0 (Fundação), só falta o backup diário
+**Fase atual:** Fase 0 (Fundação) **concluída**; próxima é a Fase 1 (Estoque)
 
 ---
 
@@ -25,23 +25,17 @@ Três SQLs já rodados no painel do Supabase: `001_fundacao`,
 
 ### Próximo passo combinado (retomar aqui)
 
-**1. Conferir em produção** que criar usuário funciona (prova de que a
-`SUPABASE_SECRET_KEY` da Vercel está certa).
-
-**2. Backup diário do banco** (PRD §13.5). O plano Free do Supabase **não tem
-backup automático**; a ideia é um GitHub Action agendado. Atenção: o
-repositório é público e o banco tem CPFs, então o arquivo de backup não pode
-ficar exposto. Decidido em 22/10: por ora o repositório fica público, porque
-os dados são fictícios. Fecha a Fase 0.
+**Fase 1: Estoque** (PRD §14): itens, categorias, locais, movimentações
+(entrada, ajuste, baixa) e histórico. Começar relendo no PRD os requisitos de
+estoque e o modelo de dados (§10) para planejar as tabelas, em blocos pequenos
+(sugestão: categorias e locais primeiro, depois itens, depois movimentações).
 
 > ⚠️ **Antes de entrar dado real** (empresa usando de verdade), tornar o
 > repositório **privado** (*GitHub → Settings → Danger Zone*) ou criptografar
-> o backup. Senão qualquer pessoa baixa o backup com os CPFs.
+> o backup. Hoje ele é público porque os dados são fictícios, e qualquer
+> pessoa logada no GitHub consegue baixar os backups.
 
 **Ideia anotada:** tela "Trocar minha senha" (hoje só dá pelo SQL, ver notas).
-
-Depois disso começa a **Fase 1: Estoque** (itens, categorias, locais e
-movimentações).
 
 ## Histórico
 
@@ -58,6 +52,13 @@ movimentações).
   `criarUsuario` não mostra mais o erro técnico (vai só para o log).
 - Repositório do GitHub continua **público**: é projeto de estudo e os dados
   (CPFs, e-mails) são fictícios.
+- Criar usuário testado e funcionando em produção.
+- **Backup diário** (`.github/workflows/backup.yml`): GitHub Actions roda às
+  03:00, exporta `roles.sql`, `schema.sql` e `data.sql` com o Supabase CLI e
+  guarda como artefato por 30 dias. Segredo `SUPABASE_DB_URL` (Session pooler)
+  no GitHub. Primeira execução falhou por senha do banco errada; depois de
+  redefinida, funcionou e o conteúdo foi conferido. Como baixar e restaurar:
+  `supabase/README.md`. **Fase 0 concluída.**
 
 ### 15/10/2026
 - **Criar login pelo próprio app** (fecha o RF03): botão *Novo usuário* em
@@ -116,7 +117,7 @@ movimentações).
 - [x] Tela de Usuários: admin **edita** nome e função, e bloqueia/libera acesso
 - [x] Criar login novo pelo próprio app (RF03)
 - [x] Tela de Configurações (dias de folga da reserva)
-- [ ] Backup diário do banco (PRD §13.5)
+- [x] Backup diário do banco (PRD §13.5)
 
 ## Notas técnicas importantes
 
@@ -150,6 +151,7 @@ movimentações).
 - **Pacote `cn`:** o shadcn/ui atual usa o pacote `cn` (do repositório oficial `shadcn-ui/cn`) no lugar de `clsx` + `tailwind-merge`. É legítimo.
 - **Checagem de tipos:** `npx tsc --noEmit` só funciona depois de rodar `npm run build` ou `npm run dev` pelo menos uma vez, porque tipos como `LayoutProps` são gerados pelo Next.js.
 - **Windows:** comandos com `!` no prompt do Claude Code rodam em Bash, então comandos do PowerShell (ex.: `Copy-Item`) falham ali.
+- **Backup e GitHub Actions:** o banco só aceita conexão de fora pelo **Session pooler** (a "Direct connection" do plano Free não funciona a partir do GitHub). Erro `password authentication failed` = senha errada no endereço (colchetes esquecidos ou símbolos). Em repositório público sem commits por 60 dias, o GitHub **desliga** robôs agendados; basta reativar na aba Actions.
 - **Deploy:** todo `git push` na `main` publica em produção em cerca de 30 segundos.
 
 ## Como rodar localmente
