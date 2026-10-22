@@ -33,6 +33,9 @@ Quatro SQLs já rodados no painel do Supabase: `001_fundacao`,
 1. ~~Categorias e locais~~ (pronto em 22/10).
 2. **Itens** (RF10, RF14, RF15): tabela `item` e telas de lista com busca e
    filtros, cadastro e edição. ← **retomar aqui**
+   Proposta já explicada ao usuário: o cadastro do item **não tem campo de
+   quantidade**; o item nasce com 0 e a quantidade só muda por movimentação
+   (entrada de 200 etc.), para ter rastreabilidade (PRD §10, RNF03).
 3. **Movimentações** (RF20, RF21, RF23, RF24): entrada, ajuste, baixa e
    histórico imutável. Decidir como a quantidade do item é calculada a partir
    das movimentações (PRD §10: "derivada ou conferida").
