@@ -25,7 +25,7 @@ Três SQLs já rodados no painel do Supabase: `001_fundacao`,
 
 ### Próximo passo combinado (retomar aqui)
 
-**Fase 1: Estoque** (PRD §14): itens, categorias, locais, movimentações
+**Fase 1: Estoque** (PRD §15, Roadmap): itens, categorias, locais, movimentações
 (entrada, ajuste, baixa) e histórico. Começar relendo no PRD os requisitos de
 estoque e o modelo de dados (§10) para planejar as tabelas, em blocos pequenos
 (sugestão: categorias e locais primeiro, depois itens, depois movimentações).
