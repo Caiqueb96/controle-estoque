@@ -31,7 +31,12 @@ Três SQLs já rodados no painel do Supabase: `001_fundacao`,
 **2. Backup diário do banco** (PRD §13.5). O plano Free do Supabase **não tem
 backup automático**; a ideia é um GitHub Action agendado. Atenção: o
 repositório é público e o banco tem CPFs, então o arquivo de backup não pode
-ficar exposto. Decidido em 22/10: repositório privado. Fecha a Fase 0.
+ficar exposto. Decidido em 22/10: por ora o repositório fica público, porque
+os dados são fictícios. Fecha a Fase 0.
+
+> ⚠️ **Antes de entrar dado real** (empresa usando de verdade), tornar o
+> repositório **privado** (*GitHub → Settings → Danger Zone*) ou criptografar
+> o backup. Senão qualquer pessoa baixa o backup com os CPFs.
 
 **Ideia anotada:** tela "Trocar minha senha" (hoje só dá pelo SQL, ver notas).
 
@@ -51,8 +56,8 @@ movimentações).
   no meio, e a mensagem de erro **exibiu a chave na tela**. Chave trocada de
   novo (antiga dá 401). Correções: `admin.ts` remove espaços da chave e
   `criarUsuario` não mostra mais o erro técnico (vai só para o log).
-- Repositório do GitHub tornado **privado** (o banco tem CPFs e o backup vai
-  ser gerado por GitHub Actions).
+- Repositório do GitHub continua **público**: é projeto de estudo e os dados
+  (CPFs, e-mails) são fictícios.
 
 ### 15/10/2026
 - **Criar login pelo próprio app** (fecha o RF03): botão *Novo usuário* em
