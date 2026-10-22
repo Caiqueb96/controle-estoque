@@ -32,3 +32,21 @@ no **SQL Editor** do painel do Supabase e executado uma vez.
 - **RLS (Row Level Security)** — o banco só devolve as linhas que as regras
   permitem, mesmo que alguém use a chave pública do app por fora. É a nossa
   segunda camada de segurança, além das checagens no servidor.
+
+## Backup diário
+
+O plano Free do Supabase não faz backup. Quem faz é o robô
+`.github/workflows/backup.yml` (GitHub Actions): todo dia às 03:00 ele exporta
+o banco em três arquivos (`roles.sql`, `schema.sql`, `data.sql`) e guarda por
+30 dias na aba **Actions** do GitHub.
+
+- **Baixar um backup:** GitHub → aba *Actions* → *Backup do banco* → clique
+  numa execução → no fim da página, em *Artifacts*, baixe o `.zip`.
+- **Rodar na hora:** mesma tela → botão *Run workflow*.
+- **Restaurar** (num projeto Supabase novo, com o `psql` instalado):
+  ```bash
+  psql "ENDERECO_DO_BANCO" -f roles.sql -f schema.sql \
+    -c "SET session_replication_role = replica" -f data.sql
+  ```
+  O `session_replication_role = replica` desliga os gatilhos e as checagens de
+  chave estrangeira durante a carga, para a ordem das tabelas não importar.

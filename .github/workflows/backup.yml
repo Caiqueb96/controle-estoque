@@ -1,0 +1,56 @@
+# Backup diário do banco (PRD §13.5, RNF07).
+#
+# O plano Free do Supabase não faz backup automático, então este robô do
+# GitHub exporta o banco todo dia e guarda os arquivos como "artefato" da
+# execução (aba Actions do GitHub), por 30 dias.
+#
+# Precisa do segredo SUPABASE_DB_URL (GitHub → Settings → Secrets and
+# variables → Actions), com o endereço do "Session pooler" do Supabase.
+#
+# ATENÇÃO: com o repositório público, qualquer pessoa logada no GitHub
+# consegue baixar estes arquivos. Ok enquanto os dados forem fictícios.
+
+name: Backup do banco
+
+on:
+  schedule:
+    # Todo dia às 06:00 UTC = 03:00 em Brasília, quando ninguém está usando.
+    - cron: "0 6 * * *"
+  # Permite rodar na mão pelo botão "Run workflow", para testar.
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+
+    steps:
+      - name: Instalar o Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # Três arquivos, como recomenda o Supabase: papéis (roles), estrutura
+      # (tabelas, funções, regras de RLS) e os dados em si.
+      - name: Exportar papéis
+        run: supabase db dump --db-url "$SUPABASE_DB_URL" -f roles.sql --role-only
+
+      - name: Exportar estrutura
+        run: supabase db dump --db-url "$SUPABASE_DB_URL" -f schema.sql
+
+      - name: Exportar dados
+        run: supabase db dump --db-url "$SUPABASE_DB_URL" -f data.sql --data-only --use-copy
+
+      - name: Guardar os arquivos
+        uses: actions/upload-artifact@v4
+        with:
+          name: backup-${{ github.run_number }}
+          path: |
+            roles.sql
+            schema.sql
+            data.sql
+          retention-days: 30
+          if-no-files-found: error
