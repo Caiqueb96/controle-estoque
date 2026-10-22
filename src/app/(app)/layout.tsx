@@ -10,6 +10,7 @@ import { sair } from "./actions"
 const MENU: { href: string; rotulo: string; perfis?: Perfil[] }[] = [
   { href: "/painel", rotulo: "Painel" },
   { href: "/pessoas", rotulo: "Pessoas" },
+  { href: "/cadastros", rotulo: "Categorias e locais", perfis: ["admin", "almoxarife"] },
   { href: "/usuarios", rotulo: "Usuários", perfis: ["admin"] },
   { href: "/configuracoes", rotulo: "Configurações", perfis: ["admin"] },
 ]

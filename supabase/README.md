@@ -12,6 +12,8 @@ no **SQL Editor** do painel do Supabase e executado uma vez.
 |---|---|
 | `sql/001_fundacao.sql` | Cria as tabelas `pessoa`, `usuario` e `configuracao`, as funções de permissão e liga a segurança por linha (RLS). |
 | `sql/002_primeiro_admin.sql` | Transforma um login já criado no painel no primeiro administrador. **Edite o e-mail e o nome antes de rodar.** |
+| `sql/003_pessoa_documento_unico.sql` | Impede cadastrar duas pessoas com o mesmo CPF. |
+| `sql/004_categorias_e_locais.sql` | Fase 1: cria `deposito` (com o depósito principal), `categoria` (com 5 categorias iniciais) e `local`, com as regras de acesso. |
 
 ## Como criar o primeiro acesso
 

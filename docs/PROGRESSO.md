@@ -152,6 +152,8 @@ estoque e o modelo de dados (§10) para planejar as tabelas, em blocos pequenos
 - **Checagem de tipos:** `npx tsc --noEmit` só funciona depois de rodar `npm run build` ou `npm run dev` pelo menos uma vez, porque tipos como `LayoutProps` são gerados pelo Next.js.
 - **Windows:** comandos com `!` no prompt do Claude Code rodam em Bash, então comandos do PowerShell (ex.: `Copy-Item`) falham ali.
 - **Backup e GitHub Actions:** o banco só aceita conexão de fora pelo **Session pooler** (a "Direct connection" do plano Free não funciona a partir do GitHub). Erro `password authentication failed` = senha errada no endereço (colchetes esquecidos ou símbolos). Em repositório público sem commits por 60 dias, o GitHub **desliga** robôs agendados; basta reativar na aba Actions.
+- **Formulário que não muda de página:** depois de enviar, o React 19 limpa os campos sozinho, inclusive quando dá erro. Para não perder o que foi digitado, a Server Action devolve os `valores` e os campos usam `defaultValue={estado.valores?.campo}` (ver `cadastros/secao-cadastro.tsx`).
+- **SQL Editor:** colar o **conteúdo** do arquivo, não o caminho dele.
 - **Deploy:** todo `git push` na `main` publica em produção em cerca de 30 segundos.
 
 ## Como rodar localmente
