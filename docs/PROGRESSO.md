@@ -3,8 +3,8 @@
 > Diário de bordo para retomar o trabalho entre sessões. Atualize ao fim de cada dia.
 > Requisitos completos do produto: [`PRD.md`](../PRD.md).
 
-**Última atualização:** 22/10/2026
-**Fase atual:** Fase 1 (Estoque), bloco 1 de 3 pronto (categorias e locais)
+**Última atualização:** 23/10/2026
+**Fase atual:** Fase 1 (Estoque), blocos 1 e 2 de 3 prontos (categorias, locais e itens)
 
 ---
 
@@ -21,24 +21,27 @@ usuário:
 - **Configurações** (só admin): dias de folga entre eventos.
 - **Categorias e locais** (`/cadastros`; admin e almoxarife editam): adicionar,
   editar, desativar/reativar.
+- **Itens** (`/itens`; admin e almoxarife editam, produtor consulta): lista com
+  busca e filtros, cadastro, edição, desativar/reativar. Quantidade ainda
+  sempre 0 (só muda por movimentação, bloco 3).
 
-Quatro SQLs já rodados no painel do Supabase: `001_fundacao`,
+Cinco SQLs já rodados no painel do Supabase: `001_fundacao`,
 `002_primeiro_admin`, `003_pessoa_documento_unico` e
-`004_categorias_e_locais`.
+`004_categorias_e_locais` e `005_itens`.
 
 ### Próximo passo combinado (retomar aqui)
 
 **Fase 1: Estoque** (PRD §15, Roadmap), em 3 blocos:
 
 1. ~~Categorias e locais~~ (pronto em 22/10).
-2. **Itens** (RF10, RF14, RF15): tabela `item` e telas de lista com busca e
-   filtros, cadastro e edição. ← **retomar aqui**
-   Proposta já explicada ao usuário: o cadastro do item **não tem campo de
-   quantidade**; o item nasce com 0 e a quantidade só muda por movimentação
-   (entrada de 200 etc.), para ter rastreabilidade (PRD §10, RNF03).
+2. ~~Itens~~ (pronto em 23/10).
 3. **Movimentações** (RF20, RF21, RF23, RF24): entrada, ajuste, baixa e
-   histórico imutável. Decidir como a quantidade do item é calculada a partir
-   das movimentações (PRD §10: "derivada ou conferida").
+   histórico imutável. ← **retomar aqui**
+   O banco já impede gravar `qtd_total`/`qtd_manutencao` direto (grants por
+   coluna no 005). A movimentação deve ser uma função `security definer` no
+   banco que, na mesma transação, grava a linha em `movimentacao` e atualiza
+   `item.qtd_total` (com trava para não ficar negativo). Histórico vai na
+   página do item (`/itens/[id]`).
 
 > ⚠️ **Antes de entrar dado real** (empresa usando de verdade), tornar o
 > repositório **privado** (*GitHub → Settings → Danger Zone*) ou criptografar
@@ -48,6 +51,16 @@ Quatro SQLs já rodados no painel do Supabase: `001_fundacao`,
 **Ideia anotada:** tela "Trocar minha senha" (hoje só dá pelo SQL, ver notas).
 
 ## Histórico
+
+### 23/10/2026 (Fase 1)
+- **Itens**: `supabase/sql/005_itens.sql` cria `item` (tipo equipamento/consumo,
+  categoria obrigatória, local opcional, unidade, estoque mínimo, valor de
+  reposição). Quantidades inteiras. Nome único sem diferenciar maiúsculas.
+  `grant`/`revoke` por coluna: o usuário só escreve as colunas do cadastro,
+  nunca `qtd_total`/`qtd_manutencao`. Telas `/itens`, `/itens/novo` e
+  `/itens/[id]`; leitura em `src/lib/itens.ts`; filtro "Abaixo do mínimo"
+  feito no código. Dinheiro: `formatarMoeda`, `moedaParaCampo` e `lerMoeda`
+  em `src/lib/formato.ts`. Testado pelo usuário.
 
 ### 22/10/2026 (Fase 1)
 - **Categorias e locais**: `supabase/sql/004_categorias_e_locais.sql` cria
@@ -171,6 +184,8 @@ Quatro SQLs já rodados no painel do Supabase: `001_fundacao`,
 - **Windows:** comandos com `!` no prompt do Claude Code rodam em Bash, então comandos do PowerShell (ex.: `Copy-Item`) falham ali.
 - **Backup e GitHub Actions:** o banco só aceita conexão de fora pelo **Session pooler** (a "Direct connection" do plano Free não funciona a partir do GitHub). Erro `password authentication failed` = senha errada no endereço (colchetes esquecidos ou símbolos). Em repositório público sem commits por 60 dias, o GitHub **desliga** robôs agendados; basta reativar na aba Actions.
 - **Formulário que não muda de página:** depois de enviar, o React 19 limpa os campos sozinho, inclusive quando dá erro. Para não perder o que foi digitado, a Server Action devolve os `valores` e os campos usam `defaultValue={estado.valores?.campo}` (ver `cadastros/secao-cadastro.tsx`).
+- **Permissão por coluna:** RLS decide *quais linhas*; `grant update (col1, col2)` decide *quais colunas*. Usado no `item` para a quantidade só mudar por movimentação. Função `security definer` passa por cima disso (é o caminho das movimentações).
+- **`numeric` chega como texto** do Supabase (para não perder centavos): converter com `Number()` ao ler (ver `src/lib/itens.ts`).
 - **SQL Editor:** colar o **conteúdo** do arquivo, não o caminho dele.
 - **Sem Python no computador:** para editar arquivos em lote, usar Node.js (`node -e`) ou as ferramentas de edição, não `python`.
 - **Deploy:** todo `git push` na `main` publica em produção em cerca de 30 segundos.

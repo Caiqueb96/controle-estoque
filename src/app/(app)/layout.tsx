@@ -9,6 +9,7 @@ import { sair } from "./actions"
 // `perfis` ausente = todo mundo ve o item.
 const MENU: { href: string; rotulo: string; perfis?: Perfil[] }[] = [
   { href: "/painel", rotulo: "Painel" },
+  { href: "/itens", rotulo: "Itens", perfis: ["admin", "almoxarife", "produtor"] },
   { href: "/pessoas", rotulo: "Pessoas" },
   { href: "/cadastros", rotulo: "Categorias e locais", perfis: ["admin", "almoxarife"] },
   { href: "/usuarios", rotulo: "Usuários", perfis: ["admin"] },

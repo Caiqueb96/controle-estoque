@@ -56,3 +56,29 @@ export function cpfValido(documento: string): boolean {
 
   return digitoVerificador(9) === Number(n[9]) && digitoVerificador(10) === Number(n[10])
 }
+
+/** 1234.5 -> "R$ 1.234,50" */
+export function formatarMoeda(valor: number): string {
+  return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+}
+
+/** 1234.5 -> "1234,50", o jeito de mostrar um valor dentro de um campo. */
+export function moedaParaCampo(valor: number): string {
+  return valor.toFixed(2).replace(".", ",")
+}
+
+/**
+ * Lê um valor em reais digitado pela pessoa. Aceita "1.234,56", "1234,56",
+ * "1234.56" e "R$ 50". Devolve NaN se não for um número.
+ */
+export function lerMoeda(texto: string): number {
+  let t = texto.replace(/R\$|\s/g, "")
+  if (t.includes(",")) {
+    // Jeito brasileiro: ponto separa milhar e vírgula separa centavos.
+    t = t.replace(/\./g, "").replace(",", ".")
+  } else if (/^\d{1,3}(\.\d{3})+$/.test(t)) {
+    // "1.500" sem vírgula é mil e quinhentos, não um e meio.
+    t = t.replace(/\./g, "")
+  }
+  return /^\d+(\.\d{1,2})?$/.test(t) ? Number(t) : NaN
+}
